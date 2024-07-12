@@ -1,0 +1,13 @@
+with "../florist/florist.gpr";
+project Ls is
+	for Languages use ("Ada", "C");
+	for Source_Dirs use ("src/ls");
+	for Object_Dir use "build/ls/obj";
+	for Exec_Dir use "build/ls";
+	for Main use ("ls.adb");
+	package Compiler is
+		Common_Switches := ();
+		for Default_Switches("C") use Common_Switches;
+		for Default_Switches("Ada") use Common_Switches;
+	end Compiler;
+end Ls;
