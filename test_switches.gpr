@@ -1,0 +1,12 @@
+with "./common.gpr";
+project Test_Switches is
+	for Languages use ("Ada");
+	for Source_Dirs use ("src/tests");
+	for Object_Dir use "build/tests/obj";
+	for Exec_Dir use "build/tests";
+	for Main use ("test_switches.adb");
+	package Compiler is
+		Common_Switches := ();
+		for Default_Switches("Ada") use Common_Switches;
+	end Compiler;
+end Test_Switches;
