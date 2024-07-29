@@ -1,4 +1,5 @@
 with Ada.Command_Line,
+     Ada.Containers.Vectors,
      Ada.Text_IO,
      Ada.Strings.Unbounded,
      Posix,
@@ -8,21 +9,29 @@ with Ada.Command_Line,
      ACoreTools.Switches;
 
 procedure Ls is
-  package CLI   renames Ada.Command_Line;
-  package TIO   renames Ada.Text_IO;
-  package SU    renames Ada.Strings.Unbounded;
-  package Files renames Posix.Files;
-  package Perms renames Posix.Permissions;
-  package Stat  renames Posix.File_Status;
-  package SW    is new ACoreTools.Switches(
+  package CLI      renames Ada.Command_Line;
+  package TIO      renames Ada.Text_IO;
+  package SU       renames Ada.Strings.Unbounded;
+  package Files    renames Posix.Files;
+  package Perms    renames Posix.Permissions;
+  package Stat     renames Posix.File_Status;
+  package SW       is new ACoreTools.Switches(
   	Argument_Count => CLI.Argument_Count,
 	Argument       => CLI.Argument
   );
+  package SVec     is new Ada.Containers.Vectors(
+  	Index_Type   => Positive,
+	Element_Type => SU.Unbounded_String,
+	"="          => SU."="
+  );
+  package SVSorter is new SVec.Generic_Sorting("<" => SU."<");
   List_All          : Boolean := False;
   Long_Listing      : Boolean := False;
   Invalid_Switch    : Boolean := False;
   Invalid_Switch_Sel: SU.Unbounded_String;
-  procedure Display_File(
+  Filenames_Vec     : SVec.Vector;
+
+  procedure Add_File(
 	  D_Entry : Files.Directory_Entry;
 	  Quit    : in out Boolean
   ) is
@@ -32,13 +41,23 @@ procedure Ls is
        (Entry_Name'Length > 0 and
 	Entry_Name(Entry_Name'First) /= '.')
     then
-      TIO.Put_Line(Entry_Name);
+    	Filenames_Vec.Append(SU.To_Unbounded_String(Entry_Name));
     end if;
-  end Display_File;
+  end Add_File;
 
-  procedure Display_Directory is new Posix.Files.For_Every_Directory_Entry(
-	Action => Display_File
-  );
+  procedure Display_Directory(FN: Posix.Posix_String) is
+  	procedure DD_Helper is new Posix.Files.For_Every_Directory_Entry(
+		Action => Add_File
+  	);
+	I : Positive;
+  begin
+  	Filenames_Vec.Clear;
+	DD_Helper(FN);
+	SVSorter.Sort(Filenames_Vec);
+	for I in Filenames_Vec.First_Index .. Filenames_Vec.Last_Index loop
+		TIO.Put_Line(SU.To_String(Filenames_Vec(I)));
+	end loop;
+  end Display_Directory;
 
   procedure Set_Switch(Selector : String) is
   begin
