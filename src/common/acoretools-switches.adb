@@ -9,29 +9,27 @@ package body ACoreTools.Switches is
 		end Maybe_Is_Switch;
 		I : Positive := 1;
 	begin
-		if not NSI_Set then
-			while (
-				Natural(I) <= Argument_Count and then
-				Maybe_Is_Switch(Argument(I))
-			) loop
-				I := I + 1;
-			end loop;
-			NSI := I;
-			NSI_Set := True;
-		end if;
-		return NSI;
+		while (
+			Natural(I) <= Argument_Count and then
+			Maybe_Is_Switch(Argument(I))
+		) loop
+			I := I + 1;
+		end loop;
+		return I;
 	end First_Nonswitch_Index;
 
-	procedure Look_For_Switch(Switch : in out Switch_Record) is
-		I : Natural;
+	procedure For_Every_Switch is
+		I : Positive;
+		procedure Scan_Arg(S : String) is
+			J : Positive;
+		begin
+			for J in (S'First + 1) .. (S'Last) loop
+				Action(S(J..J));
+			end loop;
+		end Scan_Arg;
 	begin
-		if Argument_Count = 0 then
-			return;
-		end if;
-		for I in 1 .. (First_Nonswitch_Index - 1) loop
-			if Fixed.Index(Argument(I), "" & Switch.Selector) /= 0 then
-				Switch.Value := True;
-			end if;
+		for I in 1..(First_Nonswitch_Index - 1) loop
+			Scan_Arg(Argument(I));
 		end loop;
-	end Look_For_Switch;
+	end For_Every_Switch;
 end ACoreTools.Switches;

@@ -18,17 +18,17 @@ procedure Ls is
   	Argument_Count => CLI.Argument_Count,
 	Argument       => CLI.Argument
   );
-  List_All          : SW.Switch_Record := ('a', False);
-  Long_Listing      : SW.Switch_Record := ('l', False);
+  List_All          : Boolean := False;
+  Long_Listing      : Boolean := False;
+  Invalid_Switch    : Boolean := False;
+  Invalid_Switch_Sel: SU.Unbounded_String;
   procedure Display_File(
 	  D_Entry : Files.Directory_Entry;
 	  Quit    : in out Boolean
   ) is
     Entry_Name : String := Posix.To_String(Files.Filename_Of(D_Entry));
   begin
-    SW.Look_For_Switch(List_All);
-    SW.Look_For_Switch(Long_Listing);
-    if List_All.Value or
+    if List_All or
        (Entry_Name'Length > 0 and
 	Entry_Name(Entry_Name'First) /= '.')
     then
@@ -38,6 +38,22 @@ procedure Ls is
 
   procedure Display_Directory is new Posix.Files.For_Every_Directory_Entry(
 	Action => Display_File
+  );
+
+  procedure Set_Switch(Selector : String) is
+  begin
+	if Selector = "l" then
+  		Long_Listing := True;
+	elsif Selector = "a" then
+  		List_All := True;
+	else
+		Invalid_Switch := True;
+		Invalid_Switch_Sel := SU.To_Unbounded_String(Selector);
+	end if;
+  end Set_Switch;
+
+  procedure Scan_Switches is new SW.For_Every_Switch(
+  	Action => Set_Switch
   );
 
   function Unbounded_To_Posix_String(
@@ -50,6 +66,12 @@ procedure Ls is
   UFN               : SU.Unbounded_String;
   Current_Directory : String := ".";
 begin
+  Scan_Switches;
+  if Invalid_Switch then
+	TIO.Put_Line("unknown option -" & SU.To_String(Invalid_Switch_Sel));
+	CLI.Set_Exit_Status(1);
+	return;
+  end if;
   if CLI.Argument_Count < SW.First_Nonswitch_Index then
     UFN := SU.To_Unbounded_String(Current_Directory);
   else
