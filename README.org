@@ -35,4 +35,5 @@ You can also build a test runner for the common switch library with:
 
 : gprbuild test_switches.gpr
 
-The executable will end up in ~/build/~​/name of program/​~/~.
+The executable will end up in ~/build/<name of program>/~ or
+~/build/tests/~ for test runners.
