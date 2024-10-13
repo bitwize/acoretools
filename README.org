@@ -1,9 +1,38 @@
 #+TITLE: Ada Core Unix Tools
 #+AUTHOR: bitwize@gmail.com
 
+* Intro
+
 These are clones of basic Unix utilities (~ls~, ~cat~, etc.) written
 in Ada.
 
 This repository is more of an experiment in learning programming in
 Ada, and safer software design, than anything else. Feel free to use
 and study at your leisure.
+
+* Building
+
+Everything is done with gprbuild. I haven't made this an Alire package
+yet, so you're going to have to satisfy the dependency yourself.
+
+Check out a copy of Florist (POSIX bindings for Ada) into a directory
+at the same level as this one. So from this tree's root, say:
+
+: git clone https://github.com/adacore/florist.git ../florist
+
+Then build that in place (make sure you have Make installed):
+
+: cd ../florist
+: ./configure ; make
+
+Then from this directory say:
+
+: gprbuild ls.gpr
+: gprbuild cat.gpr
+
+
+You can also build a test runner for the common switch library with:
+
+: gprbuild test_switches.gpr
+
+The executable will end up in ~/build/~​/name of program/​~/~.
