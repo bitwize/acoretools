@@ -63,29 +63,32 @@ begin
 	end if;
 	if CLI.Argument_Count < SW.First_Nonswitch_Index then
 		Cat_File(PIO.Standard_Input);
-	else		
-		declare
-			FN : Posix.Posix_String := Posix.To_Posix_String(CLI.Argument(SW.First_Nonswitch_Index));
-			FD : PIO.File_Descriptor;
-		begin
-			if Posix.Files.Is_Directory(FN) then
-				TIO.Put_Line(
-					TIO.Standard_Error,
-				        Posix.To_String(FN) & ": is a directory"
-      				);
-				CLI.Set_Exit_Status(1);
-			elsif not Posix.Files.Is_File(FN) then
-				TIO.Put_Line(
-					TIO.Standard_Error,
-				        Posix.To_String(FN) & ": not found"
-      				);
-				CLI.Set_Exit_Status(1);
-			else
-				FD := PIO.Open(FN, PIO.Read_Only);
-				Cat_File(FD);
-				PIO.Close(FD);
-			end if;
-		end;
-	end if;
-	
+	else
+		for I in SW.First_Nonswitch_Index .. CLI.Argument_Count loop
+			declare
+				FN : Posix.Posix_String := Posix.To_Posix_String(CLI.Argument(I));
+				FD : PIO.File_Descriptor;
+			begin
+				if Posix.Files.Is_Directory(FN) then
+					TIO.Put_Line(
+						TIO.Standard_Error,
+					        Posix.To_String(FN) & ": is a directory"
+      					);
+					CLI.Set_Exit_Status(1);
+					return;
+				elsif not Posix.Files.Is_File(FN) then
+					TIO.Put_Line(
+						TIO.Standard_Error,
+				        	Posix.To_String(FN) & ": not found"
+      					);
+					CLI.Set_Exit_Status(1);
+					return;
+				else
+					FD := PIO.Open(FN, PIO.Read_Only);
+					Cat_File(FD);
+					PIO.Close(FD);
+				end if;
+			end;
+		end loop;
+	end if;	
 end Cat;	  
