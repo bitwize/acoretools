@@ -1,0 +1,9 @@
+#+TITLE: Ada Core Unix Tools
+#+AUTHOR: bitwize@gmail.com
+
+These are clones of basic Unix utilities (~ls~, ~cat~, etc.) written
+in Ada.
+
+This repository is more of an experiment in learning programming in
+Ada, and safer software design, than anything else. Feel free to use
+and study at your leisure.
